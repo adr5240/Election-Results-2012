@@ -1,6 +1,7 @@
 library(shiny)
 
 shinyServer(function(input, output, session) {
+  
   options(scipen=5) # Remove scientific notation from graphs
   
   # Lables
@@ -78,7 +79,7 @@ shinyServer(function(input, output, session) {
     
     lbls <- paste(lbls, pct) # add percents to labels 
     lbls <- paste(lbls,"%",sep="") # add '%' to labels 
-    pie(slices,labels = lbls, col=c('yellow', 'pink'),
+    pie(slices,labels = lbls, col=c('khaki1', 'grey80'),
         main="Voter Turnout")
   })
   
@@ -107,7 +108,7 @@ shinyServer(function(input, output, session) {
     lbls <- paste(lbls,"%",sep="") # add '%' to labels
     
     barplot(currBars, main="Voter Turnout", ylab="Eligible Voters", ylim=c(0,max(currBars) + 10000),
-            col=c("yellow", "pink"), names.arg = lbls)
+            col=c("khaki1", "grey80"), names.arg = lbls)
   })
   
   barAge <- reactive({
@@ -116,7 +117,7 @@ shinyServer(function(input, output, session) {
     lbls <- c("Obama", "Romney", "Voter Turnout")
     
     barplot(as.matrix(age[,-1]), main=input$dataType, ylab="Percent",
-            col=c("green", "yellow", 'orange','pink'), names.arg = lbls, legend.text=ageNames,
+            col=c("goldenrod1", "darkorange", 'brown3','coral4'), names.arg = lbls, legend.text=ageNames,
             beside=TRUE)
   })
   
@@ -128,7 +129,7 @@ shinyServer(function(input, output, session) {
     lbls <- c("Obama", "Romney", "Voter Turnout")
     
     barplot(as.matrix(race[,-1]), main='Voters Race', ylab="Percent",
-            col=c("white", "black", 'tan','yellow', 'brown'), names.arg = lbls, legend.text=raceNames,
+            col=c("light grey", "black", 'tan','yellow', 'brown'), names.arg = lbls, legend.text=raceNames,
             beside=TRUE)
   })
   
@@ -152,7 +153,7 @@ shinyServer(function(input, output, session) {
     currBars <- currBars[,-44]
     
     barplot(currBars, main="Voter Turnout by State", ylab="Eligible Voters", 
-            col=c("yellow", "pink"), legend = c("Voters", "Non-Voters"))
+            col=c("khaki1", "grey80"), legend = c("Voters", "Non-Voters"))
   })
   
   output$graph <- renderPlot({
