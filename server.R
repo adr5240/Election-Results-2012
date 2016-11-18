@@ -35,24 +35,16 @@ shinyServer(function(input, output, session) {
   # Create new Data.Frames
   byState <- as.data.frame(t(popular))
   
-  # Reset selectInputs
+  # Reset selectInputs based on Tab
   observe({
-    z <- input$dataType
-    x <- input$onClick$x
+    z <- input$tabs
     
-    # NOTE -- Keep working here
-    # Need to fix following if for 'Voter Turnout' Chart
-    state <- switcher(x)
-    
-    if (z == 'Voter Turnout' & !is.null(state)) {
-      updateSelectInput(session, 'stateName', selected=state, choices=stateNames)
-      updateSelectInput(session, 'graphType', selected='Bar', choices=c('Bar', 'Pie')) 
-    } else if (z == 'Voter Age' || z == 'Voter Race') {
-      updateSelectInput(session, 'graphType', choices='Bar') 
-      updateSelectInput(session, 'stateName', choices='Total')
-    } else if (z != 'Voter Turnout') {
-      updateSelectInput(session, 'graphType', selected='Bar', choices=c('Bar', 'Pie')) 
-      updateSelectInput(session, 'stateName', selected='Total', choices=stateNames)
+    if (z == 'Turnout' || z == 'Number of Votes') {
+      updateSelectInput(session, 'stateName', choices=stateNames)
+      updateSelectInput(session, 'graphType', choices=c('Bar', 'Pie'))
+    } else if (z == 'Age' || z == 'Race') {
+       updateSelectInput(session, 'graphType', choices='Bar')
+       updateSelectInput(session, 'stateName', choices='Total')
     }
   })
   
@@ -133,7 +125,7 @@ shinyServer(function(input, output, session) {
             beside=TRUE)
   })
   
-  stateBar <- reactive({
+  barState <- reactive({
     input$graphType
     input$stateName
     
@@ -156,23 +148,41 @@ shinyServer(function(input, output, session) {
             col=c("khaki1", "grey80"), legend = c("Voters", "Non-Voters"))
   })
   
-  output$graph <- renderPlot({
-    if (input$graphType == "Pie" & input$dataType == "Number of Votes") {
+  # Graphs
+  output$numOfVotes <- renderPlot({
+    if (input$graphType == 'Pie') {
       pieNumVotes()
-    } else if (input$graphType == "Pie") {
-      pieVoterTurnout()
-    } else if (input$graphType == "Bar" & input$dataType == "Voter Turnout" & 
-               input$stateName == "Total") {
-      stateBar()
-    } else if (input$graphType == "Bar" & input$dataType == "Number of Votes") {
+    } else {
       barNumVotes()
-    } else if (input$graphType == "Bar" & input$dataType == 'Voter Turnout') {
-      barVoterTurnout()
-    } else if (input$graphType == "Bar" & input$dataType == 'Voter Age') {
-      barAge()
-    } else if (input$graphType == "Bar" & input$dataType == 'Voter Race') {
-      barRace()
     }
+  })
+  
+  output$turnout <- renderPlot({
+    x <- input$onClick$x
+    state <- switcher(x)
+    
+    if (!is.null(state)) {
+      updateSelectInput(session, 'stateName', selected=state, choices=stateNames)
+      barVoterTurnout()
+    } else if (input$graphType == 'Bar' & input$stateName == 'Total') {
+      barState()
+    } else if (input$graphType == 'Pie') {
+      pieVoterTurnout()
+    } else {
+      barVoterTurnout()
+    }
+  })
+  
+  output$age <- renderPlot({
+    updateSelectInput(session, 'graphType', choices='Bar') 
+    updateSelectInput(session, 'stateName', choices='Total')
+    barAge()
+  })
+  
+  output$race <- renderPlot({
+    updateSelectInput(session, 'graphType', choices='Bar') 
+    updateSelectInput(session, 'stateName', choices='Total')
+    barRace()
   })
   
   # Misc
