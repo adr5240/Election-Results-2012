@@ -75,7 +75,6 @@ shinyServer(function(input, output, session) {
         main="Voter Turnout")
   })
   
-  # NOTE condense these into one method
   barNumVotes <- reactive({
     input$dataType
     bars <- subset(popular, States==input$stateName)
@@ -105,8 +104,7 @@ shinyServer(function(input, output, session) {
   })
   
   barAge <- reactive({
-    bars <- c(unlist(age[2]), unlist(age[3]), unlist(age[4]))
-    
+    x <- input$stateName
     lbls <- c("Obama", "Romney", "Voter Turnout")
     
     barplot(as.matrix(age[,-1]), main=input$dataType, ylab="Percent",
@@ -115,10 +113,7 @@ shinyServer(function(input, output, session) {
   })
   
   barRace <- reactive({
-    x <- input$dataType
-    
-    bars <- c(unlist(race[2]), unlist(race[3]), unlist(race[4]))
-    
+    x <- input$stateName
     lbls <- c("Obama", "Romney", "Voter Turnout")
     
     barplot(as.matrix(race[,-1]), main='Voters Race', ylab="Percent",
@@ -149,6 +144,32 @@ shinyServer(function(input, output, session) {
             col=c("khaki1", "grey80"), legend = c("Voters", "Non-Voters"))
   })
   
+  barRacePresident <- reactive({
+    if (input$stateName == "Obama")         { x <- 2
+    } else if (input$stateName == "Romney") { x <- 3
+    } else { x <- 4 }
+    
+    lbls <- c(unlist(race[x]))
+    lbls <- paste(lbls,"%",sep="") # add '%' to labels
+    
+    barplot(as.matrix(race[x]), main='Voters Race', ylab="Percent",
+            col=c("light grey", "black", 'tan','yellow', 'brown'), names.arg = lbls, legend.text=raceNames,
+            beside=TRUE)
+  })
+  
+  barAgePresident <- reactive({
+    if (input$stateName == "Obama")         { x <- 2
+    } else if (input$stateName == "Romney") { x <- 3
+    } else { x <- 4 }
+    
+    lbls <- c(unlist(age[x]))
+    lbls <- paste(lbls,"%",sep="") # add '%' to labels
+    
+    barplot(as.matrix(age[x]), main='Voters Age', ylab="Percent",
+            col=c("goldenrod1", "darkorange", 'brown3','coral4'), names.arg = lbls, legend.text=ageNames,
+            beside=TRUE)
+  })
+  
   # Graphs
   output$numOfVotes <- renderPlot({
     if (input$graphType == 'Pie') {
@@ -176,13 +197,23 @@ shinyServer(function(input, output, session) {
   
   # NOTE work on age/race with new president tab
   output$age <- renderPlot({
-    updateSelectInput(session, 'graphType', choices='Bar')   
-    barAge()
+    updateSelectInput(session, 'graphType', choices='Bar') 
+    
+    if (input$stateName == 'Obama' || input$stateName == 'Romney') {
+      barAgePresident()
+    } else {
+      barAge() 
+    }
   })
   
   output$race <- renderPlot({
     updateSelectInput(session, 'graphType', choices='Bar') 
-    barRace()
+    
+    if (input$stateName == 'Obama' || input$stateName == 'Romney') {
+      barRacePresident()  
+    } else {
+      barRace()
+    }
   })
   
   # Misc
