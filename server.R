@@ -40,11 +40,11 @@ shinyServer(function(input, output, session) {
     z <- input$tabs
     
     if (z == 'Turnout' || z == 'Number of Votes') {
-      updateSelectInput(session, 'stateName', choices=stateNames)
+      updateSelectInput(session, 'stateName', label='Filter by State', choices=stateNames)
       updateSelectInput(session, 'graphType', choices=c('Bar', 'Pie'))
     } else if (z == 'Age' || z == 'Race') {
        updateSelectInput(session, 'graphType', choices='Bar')
-       updateSelectInput(session, 'stateName', choices='Total')
+       updateSelectInput(session, 'stateName', label='Filter by Candidate', choices=c('All','Obama','Romney'))
     }
   })
   
@@ -75,6 +75,7 @@ shinyServer(function(input, output, session) {
         main="Voter Turnout")
   })
   
+  # NOTE condense these into one method
   barNumVotes <- reactive({
     input$dataType
     bars <- subset(popular, States==input$stateName)
@@ -92,7 +93,7 @@ shinyServer(function(input, output, session) {
   
   barVoterTurnout <- reactive({
     bars <- subset(popular, States==input$stateName)
-    currBars <- c(as.numeric(bars[T]), as.numeric(bars[E] - bars[T])) 
+    currBars <- c(as.numeric(bars[T]), as.numeric(bars[E] - bars[T]))
     
     pct <- round(as.numeric(currBars) / as.numeric(bars[E])*100)
     lbls <- c("Voters", "Non-Voters")
@@ -144,7 +145,7 @@ shinyServer(function(input, output, session) {
     rownames(currBars) <- c("Voters", "Non-Voters")
     currBars <- currBars[,-44]
     
-    barplot(currBars, main="Voter Turnout by State", ylab="Eligible Voters", 
+    barplot(currBars, main="Voter Turnout by State", ylim=c(0,max(currBars) + 10000), ylab="Eligible Voters", 
             col=c("khaki1", "grey80"), legend = c("Voters", "Non-Voters"))
   })
   
@@ -173,15 +174,14 @@ shinyServer(function(input, output, session) {
     }
   })
   
+  # NOTE work on age/race with new president tab
   output$age <- renderPlot({
-    updateSelectInput(session, 'graphType', choices='Bar') 
-    updateSelectInput(session, 'stateName', choices='Total')
+    updateSelectInput(session, 'graphType', choices='Bar')   
     barAge()
   })
   
   output$race <- renderPlot({
     updateSelectInput(session, 'graphType', choices='Bar') 
-    updateSelectInput(session, 'stateName', choices='Total')
     barRace()
   })
   
