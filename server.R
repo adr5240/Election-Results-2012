@@ -99,7 +99,7 @@ shinyServer(function(input, output, session) {
     lbls <- paste(lbls, pct) # add percents to labels 
     lbls <- paste(lbls,"%",sep="") # add '%' to labels
     
-    barplot(currBars, main="Voter Turnout", ylab="Eligible Voters", ylim=c(0,max(currBars) + 10000),
+    barplot(currBars, main="Voter Turnout", ylab="Eligible Voters",
             col=c("khaki1", "grey80"), names.arg = lbls)
   })
   
@@ -140,7 +140,7 @@ shinyServer(function(input, output, session) {
     rownames(currBars) <- c("Voters", "Non-Voters")
     currBars <- currBars[,-44]
     
-    barplot(currBars, main="Voter Turnout by State", ylim=c(0,max(currBars) + 10000), ylab="Eligible Voters", 
+    barplot(currBars, main="Voter Turnout by State", ylab="Eligible Voters", 
             col=c("khaki1", "grey80"), legend = c("Voters", "Non-Voters"))
   })
   
@@ -195,7 +195,6 @@ shinyServer(function(input, output, session) {
     }
   })
   
-  # NOTE work on age/race with new president tab
   output$age <- renderPlot({
     updateSelectInput(session, 'graphType', choices='Bar') 
     
