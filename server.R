@@ -43,7 +43,7 @@ shinyServer(function(input, output, session) {
       updateSelectInput(session, 'stateName', label='Filter by State', choices=stateNames)
       updateSelectInput(session, 'graphType', choices=c('Bar', 'Pie'))
     } else if (z == 'Age' || z == 'Race') {
-       updateSelectInput(session, 'graphType', choices='Bar')
+       updateSelectInput(session, 'graphType', choices=c('Bar', 'Pie'))
        updateSelectInput(session, 'stateName', label='Filter by Candidate', choices=c('All','Obama','Romney'))
     }
   })
@@ -144,7 +144,7 @@ shinyServer(function(input, output, session) {
             col=c("khaki1", "grey80"), legend = c("Voters", "Non-Voters"))
   })
   
-  barRacePresident <- reactive({
+  racePresident <- reactive({
     if (input$stateName == "Obama")         { x <- 2
     } else if (input$stateName == "Romney") { x <- 3
     } else { x <- 4 }
@@ -152,12 +152,20 @@ shinyServer(function(input, output, session) {
     lbls <- c(unlist(race[x]))
     lbls <- paste(lbls,"%",sep="") # add '%' to labels
     
-    barplot(as.matrix(race[x]), main='Voters Race', ylab="Percent",
-            col=c("light grey", "black", 'tan','yellow', 'brown'), names.arg = lbls, legend.text=raceNames,
-            beside=TRUE)
+    
+    if (input$graphType == "Bar") {
+      barplot(as.matrix(race[x]), main='Votes by Race', ylab="Percent",
+              col=c("light grey", "black", 'tan','yellow', 'brown'), names.arg = lbls, legend.text=raceNames,
+              beside=TRUE)  
+    } else {
+      lbls <- paste(raceNames, lbls, sep=" ")
+      main <- paste("Votes for", input$stateName, "by Race")
+      pie(c(unlist(race[x])), labels = lbls, col=c("light grey", "black", 'tan','yellow', 'brown'),
+          main=main)
+    }
   })
   
-  barAgePresident <- reactive({
+  agePresident <- reactive({
     if (input$stateName == "Obama")         { x <- 2
     } else if (input$stateName == "Romney") { x <- 3
     } else { x <- 4 }
@@ -165,12 +173,20 @@ shinyServer(function(input, output, session) {
     lbls <- c(unlist(age[x]))
     lbls <- paste(lbls,"%",sep="") # add '%' to labels
     
-    barplot(as.matrix(age[x]), main='Voters Age', ylab="Percent",
-            col=c("goldenrod1", "darkorange", 'brown3','coral4'), names.arg = lbls, legend.text=ageNames,
-            beside=TRUE)
+    if (input$graphType == "Bar") {
+      barplot(as.matrix(age[x]), main='Voters Age', ylab="Percent",
+              col=c("goldenrod1", "darkorange", 'brown3','coral4'), names.arg = lbls, legend.text=ageNames,
+              beside=TRUE)
+    } else {
+      lbls <- paste(ageNames, lbls, sep=" - ")
+      main <- paste("Votes for", input$stateName, "by Age")
+      pie(c(unlist(age[x])), labels = lbls, col=c("goldenrod1", "darkorange", 'brown3','coral4'),
+          main=main)
+    }
+    
   })
   
-  # Graphs
+  # Outputs
   output$numOfVotes <- renderPlot({
     if (input$graphType == 'Pie') {
       pieNumVotes()
@@ -196,20 +212,16 @@ shinyServer(function(input, output, session) {
   })
   
   output$age <- renderPlot({
-    updateSelectInput(session, 'graphType', choices='Bar') 
-    
     if (input$stateName == 'Obama' || input$stateName == 'Romney') {
-      barAgePresident()
+      agePresident()
     } else {
       barAge() 
     }
   })
   
   output$race <- renderPlot({
-    updateSelectInput(session, 'graphType', choices='Bar') 
-    
     if (input$stateName == 'Obama' || input$stateName == 'Romney') {
-      barRacePresident()  
+      racePresident()  
     } else {
       barRace()
     }
